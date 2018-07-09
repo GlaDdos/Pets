@@ -4,9 +4,7 @@ import android.provider.BaseColumns;
 
 public final class PetContract {
 
-    private PetContract(){
-
-    }
+    private PetContract(){}
 
     public static final class PetEntry implements BaseColumns {
 
