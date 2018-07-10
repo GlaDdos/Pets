@@ -31,6 +31,8 @@ public class PetDbHelper extends SQLiteOpenHelper {
         Log.v(LOG_TAG, SQL_CREATE_PETS_TABLE);
     }
 
+
+
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
