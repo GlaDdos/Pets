@@ -108,18 +108,6 @@ public class CatalogActivity extends AppCompatActivity {
         }
     }
 
-    public void insertPet() {
-        SQLiteDatabase db = petDbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(PetEntry.COLUMN_PET_NAME, "Toto");
-        values.put(PetEntry.COLUMN_PET_BREED, "Terrier");
-        values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
-        values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
-
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_catalog.xml file.
@@ -134,7 +122,6 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                insertPet();
                 return true;
 
             // Respond to a click on the "Delete all entries" menu option
