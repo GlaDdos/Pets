@@ -25,6 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.pets.data.PetContract;
@@ -74,38 +75,11 @@ public class CatalogActivity extends AppCompatActivity {
 
         Cursor cursor = getContentResolver().query(PetContract.CONTENT_URI, projection, null, null, null, null);
 
-        TextView textView = (TextView) findViewById(R.id.text_view_pet);
+        ListView petListView = (ListView)findViewById(R.id.list);
+        PetCursorAdapter petCursorAdapter = new PetCursorAdapter(this, cursor);
 
-        try {
-            textView.setText("The pet table contains " + cursor.getCount() + " pets. \n\n");
-            textView.append(PetEntry._ID + " - " +
-                    PetEntry.COLUMN_PET_NAME + " - " +
-                    PetEntry.COLUMN_PET_BREED + " - " +
-                    PetEntry.COLUMN_PET_GENDER + " - " +
-                    PetEntry.COLUMN_PET_WEIGHT + " - " + "\n");
+        petListView.setAdapter(petCursorAdapter);
 
-            int idIndex = cursor.getColumnIndex(PetEntry._ID);
-            int nameIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-            int breedIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
-            int genderIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
-            int weightIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
-
-            while(cursor.moveToNext()){
-                int id = cursor.getInt(idIndex);
-                String name = cursor.getString(nameIndex);
-                String breed = cursor.getString(breedIndex);
-                int gender = cursor.getInt(genderIndex);
-                int weigth = cursor.getInt(weightIndex);
-
-                textView.append("\n" + id + " - " +
-                    name + " - " +
-                    breed + " - " +
-                    gender + " - " +
-                    weigth + " - ");
-            }
-        } finally {
-            cursor.close();
-        }
     }
 
     @Override
