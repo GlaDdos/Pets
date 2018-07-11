@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.IllformedLocaleException;
+
 public class PetProvider extends ContentProvider {
 
     public static final String LOG_TAG = ContentProvider.class.getSimpleName();
@@ -63,7 +65,18 @@ public class PetProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        final int match = uriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return PetContract.PetEntry.CONTENT_LIST_TYPE;
+
+            case PET_ID:
+                return PetContract.PetEntry.CONTENT_ITEM_TYPE;
+
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + "with match " + match);
+
+        }
     }
 
     @Nullable
@@ -82,6 +95,21 @@ public class PetProvider extends ContentProvider {
 
     private Uri insertPet(Uri uri, ContentValues contentValues) {
 
+        String name = contentValues.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
+        if(name == null){
+            throw new IllegalArgumentException("Pet requires name!");
+        }
+
+        Integer gender = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+        if(gender == null || !PetContract.PetEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException("Pet requires valid gender");
+        }
+
+        Integer weight = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+        if(weight != null && weight < 0) {
+            throw new IllegalArgumentException("Pet requires valid weight");
+        }
+
         SQLiteDatabase database = petDbHelper.getWritableDatabase();
         long id = database.insert(PetContract.PetEntry.TABLE_NAME, null, contentValues);
 
@@ -95,12 +123,72 @@ public class PetProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        SQLiteDatabase database = petDbHelper.getWritableDatabase();
+
+        final int match = uriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+
+            case PET_ID:
+                selection = PetContract.PetEntry._ID + "=?";
+                selectionArgs = new String[] {PetContract.PetEntry.TABLE_NAME, String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+
+        }
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
+        final int match = uriMatcher.match(uri);
+        switch(match) {
+            case PETS:
+                return updatePet(uri, contentValues,selection, selectionArgs);
+
+            case PET_ID:
+                selection = PetContract.PetEntry._ID + "=?";
+                selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
+                return update(uri, contentValues, selection, selectionArgs);
+
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+
+        }
+    }
+
+    private int updatePet(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
+
+        if(contentValues.containsKey(PetContract.PetEntry.COLUMN_PET_NAME)) {
+            String name = contentValues.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
+            if(name == null) {
+                throw new IllegalArgumentException("Pet requires a name!");
+            }
+        }
+
+        if(contentValues.containsKey(PetContract.PetEntry.COLUMN_PET_GENDER)) {
+            Integer gender = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+            if(gender == null || !PetContract.PetEntry.isValidGender(gender)) {
+                throw new IllegalArgumentException("Pet requires valid gender");
+            }
+        }
+
+        if(contentValues.containsKey(PetContract.PetEntry.COLUMN_PET_WEIGHT)) {
+            Integer weigth = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+            if(weigth != null && weigth < 0) {
+                throw new IllegalArgumentException("Pet requires valid weight");
+            }
+        }
+
+        if(contentValues.size() == 0) {
+            return 0;
+        }
+
+        SQLiteDatabase database = petDbHelper.getWritableDatabase();
+
+        return database.update(PetContract.PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
     }
 }
