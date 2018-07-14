@@ -134,7 +134,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String sName = mNameEditText.getText().toString().trim();
         String sBreed = mBreedEditText.getText().toString().trim();
         String sWeight = mWeightEditText.getText().toString().trim();
-        int iWeight = Integer.parseInt(sWeight);
+
+        int iWeight = 0;
+
+        if(!TextUtils.isEmpty(sWeight)){
+            iWeight = Integer.parseInt(sWeight);
+        }
 
         if(currentPetUri == null &&
                 TextUtils.isEmpty(sName) && TextUtils.isEmpty(sBreed) &&
