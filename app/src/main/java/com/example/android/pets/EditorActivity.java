@@ -88,6 +88,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if(currentPetUri == null) {
             setTitle(getString(R.string.editor_activity_title_new_pet));
+            invalidateOptionsMenu();
+
         } else {
             setTitle(getString(R.string.editor_activity_title_edit_pet));
             getSupportLoaderManager().initLoader(EXISTING_PET_LOADER, null, this);
@@ -214,7 +216,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Do nothing for now
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -329,5 +331,55 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    private void showDeleteConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_message);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int id) {
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (dialogInterface != null) {
+                    dialogInterface.dismiss();
+                }
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deletePet() {
+
+        if(currentPetUri != null ) {
+            int rowsDeleted = getContentResolver().delete(currentPetUri, null, null);
+
+            if(rowsDeleted == 0) {
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed), Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(this, getString(R.string.editor_delete_pet_successful), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        finish();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        if(currentPetUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+
+        return true;
     }
 }

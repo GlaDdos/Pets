@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,7 +39,9 @@ import com.example.android.pets.data.PetContract.PetEntry;
  */
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String LOG_TAG = CatalogActivity.class.getSimpleName();
     private static final int PET_LOADER = 0;
+
     PetCursorAdapter petCursorAdapter;
 
     @Override
@@ -98,7 +101,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -123,5 +126,10 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         petCursorAdapter.swapCursor(null);
+    }
+
+    private void deleteAllPets() {
+        int rowsDeleted = getContentResolver().delete(PetEntry.CONTENT_URI, null, null);
+        Log.v(LOG_TAG, rowsDeleted + " rows deleted from pet database.");
     }
 }
